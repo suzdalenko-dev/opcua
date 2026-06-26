@@ -7,7 +7,6 @@ import shutil
 from assets.exceptions import FatalServiceError
 from assets.funcions.func2 import local_datetime_text
 from config import DISK_RETRY_SECONDS, DISK_WRITE_MAX_RETRIES, LOG_DIRECTORY, MIN_FREE_DISK_BYTES, RECONNECT_DELAY_SECONDS, WATCHDOG_INTERVAL_SECONDS
-from main import STAT_TAGS
 
 
 
