@@ -4,30 +4,11 @@ import json
 import os
 from pathlib import Path
 import shutil
-import signal
-
 from assets.exceptions import FatalServiceError
-from config import DISK_RETRY_SECONDS, DISK_WRITE_MAX_RETRIES, LOG_DIRECTORY, MIN_FREE_DISK_BYTES, QUEUE_DRAIN_TIMEOUT_SECONDS, RECONNECT_DELAY_SECONDS, WATCHDOG_INTERVAL_SECONDS
+from assets.funcions.func2 import local_datetime_text
+from config import DISK_RETRY_SECONDS, DISK_WRITE_MAX_RETRIES, LOG_DIRECTORY, MIN_FREE_DISK_BYTES, RECONNECT_DELAY_SECONDS, WATCHDOG_INTERVAL_SECONDS
 from main import STAT_TAGS
 
-
-def local_datetime_text(moment=None, milliseconds=True,):
-    """
-    Devuelve la fecha local en formato:
-
-        YYYY-MM-DD HH:MM:SS.mmm
-
-    O sin milisegundos cuando:
-
-        milliseconds=False
-    """
-    if moment is None:
-        moment = (datetime.now().astimezone())
-
-    if milliseconds:
-        return moment.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-
-    return moment.strftime("%Y-%m-%d %H:%M:%S")
 
 
 
@@ -176,62 +157,6 @@ def check_free_disk_space():
 
 
 
-def write_health(status, detail="", queue_size=0, last_opc_ok="", free_disk_bytes=None,):
-    """
-    Escribe health.json mediante reemplazo
-    atómico para evitar dejarlo incompleto.
-    """
-    file_path = (get_health_file_path())
-    temporary_file_path = (file_path.with_name(f".{file_path.name}.tmp"))
-
-    if free_disk_bytes is None:
-        try:
-            free_disk_bytes = (get_free_disk_bytes())
-        except Exception:
-            free_disk_bytes = None
-
-    record = {
-        "updated_at": (local_datetime_text()),
-        "status": status,
-        "queue_size": queue_size,
-        "last_opc_ok": last_opc_ok,
-    }
-
-    if detail:
-        record["detail"] = detail
-
-    if free_disk_bytes is not None:
-        record["free_disk_mb"] = round(free_disk_bytes / 1024 / 1024, 2,)
-
-    with temporary_file_path.open("w", encoding="utf-8",) as file:
-        json.dump(record, file, ensure_ascii=False, separators=(",", ":"),)
-        file.write( "\n")
-        file.flush()
-        os.fsync(file.fileno())
-
-    os.replace(temporary_file_path, file_path,)
-
-
-
-def safe_write_health(status, detail="", queue_size=0, last_opc_ok="", free_disk_bytes=None,):
-    """
-    Actualiza health.json sin permitir que
-    un fallo de este archivo cierre el servicio.
-    """
-    try:
-        write_health(
-            status=status,
-            detail=detail,
-            queue_size=queue_size,
-            last_opc_ok=last_opc_ok,
-            free_disk_bytes=free_disk_bytes,
-        )
-    except Exception as error:
-        print(
-            f"{local_datetime_text(milliseconds=False)} "
-            f"[ERROR HEALTH] "
-            f"{error!r}"
-        )
 
 
 
@@ -454,35 +379,3 @@ async def wait_before_reconnect(stop_event,):
 
 
 
-def configure_stop_signals(stop_event,):
-    """
-    Configura Ctrl+C y la parada enviada
-    por systemd mediante SIGTERM.
-    """
-    loop = asyncio.get_running_loop()
-
-    def stop_handler(signum, frame,):
-        print("Orden de parada recibida...")
-
-        loop.call_soon_threadsafe(stop_event.set)
-
-    signal.signal(signal.SIGINT, stop_handler,)
-    signal.signal( signal.SIGTERM, stop_handler,)
-
-
-
-async def stop_writer_normally(event_queue, writer_task,):
-    """
-    Vacía la cola y detiene el escritor
-    durante una parada normal.
-    """
-    print("Guardando los eventos pendientes...")
-
-    await asyncio.wait_for(
-        event_queue.join(),
-        timeout=QUEUE_DRAIN_TIMEOUT_SECONDS,
-    )
-
-    if not writer_task.done():
-        await event_queue.put(None)
-        await writer_task

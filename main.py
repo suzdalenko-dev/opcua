@@ -1,6 +1,7 @@
 import asyncio
 from assets.exceptions import FatalServiceError
-from assets.funcions.func import configure_stop_signals, local_datetime_text, safe_write_health
+from assets.funcions.func import  safe_write_health
+from assets.funcions.func2 import configure_stop_signals, local_datetime_text
 from assets.service import run_service
 from config import (TAGS, OTHER_TAGS,)
 
