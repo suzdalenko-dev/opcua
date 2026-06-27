@@ -93,6 +93,6 @@ class SusctiptionHandler:
             EVENT_QUEUE.put_nowait(event,)
 
         except Exception as e:
-            print('ERROR SUSCRIPTION HANDLER')
+            print(f"ERROR SUSCRIPTION HANDLER {e}")
             print(str(e))
 
