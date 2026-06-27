@@ -1,20 +1,6 @@
-from pathlib import Path
-
-
-# ----------------------------------------------------------------------
-# CONFIGURACION
-# Este es el UNICO sitio donde se definen los tags y los parametros.
-# main.py los importa de aqui (no los redefine).
-# ----------------------------------------------------------------------
-
-# --- Conexion OPC UA ---
-URL = "opc.tcp://192.168.14.30:4840"
-NODE_ID_PREFIX = "ns=2;s=CPS-MCS341-DS.STAG."
+URL               = "opc.tcp://192.168.14.30:4840"
+NODE_ID_PREFIX    = "ns=2;s=CPS-MCS341-DS.STAG."
 READ_TAGS_TIME_MS = 222
-MONITORED_ITEM_QUEUE_SIZE = 1000
-
-# --- Donde se guardan los datos ---
-LOG_DIRECTORY = Path("/var/lib/froxa-opcua")
 
 
 # Estos van al SEGUNDO archivo (ademas del de "todas").
@@ -56,9 +42,4 @@ OTHER_TAGS = [
     "STAG26",  # fin del lote
 ]
 
-
-# Todos los tags a los que nos suscribimos (van al archivo "todas").
-ALL_TAGS = tuple(dict.fromkeys(TAGS + OTHER_TAGS))
-
-# Conjunto para comprobar rapido si un tag va tambien al segundo archivo.
-STAT_TAGS = frozenset(TAGS)
+ALL_TAGS = TAGS + OTHER_TAGS

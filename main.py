@@ -1,40 +1,56 @@
-"""
-Punto de entrada del recolector OPC UA de FROXA.
-
-Responsabilidad UNICA de este modulo: arrancar el servicio y pararlo
-de forma ordenada cuando llega Ctrl+C (SIGINT) o systemd (SIGTERM).
-
-Estructura del proyecto:
-    config.py          -> configuracion (URL, tags, rutas)
-    almacenamiento.py  -> guarda los datos en disco (jsonl + fsync)
-    suscripcion.py     -> recibe los cambios del equipo
-    servicio.py        -> conecta y mantiene la suscripcion
-    main.py            -> arranca todo (este archivo)
-"""
-
 import asyncio
-import signal
+from asyncua import Client, ua
+from assets.jsonl_writer import jsonl_writer
+from assets.suscription_hadler_file import SusctiptionHandler
+from config import ALL_TAGS, NODE_ID_PREFIX, READ_TAGS_TIME_MS, URL
 
-from servicio import ejecutar
 
 
-def configurar_senales_de_parada(stop_event):
-    loop = asyncio.get_running_loop()
 
-    def manejar_parada(signum, frame):
-        print("Senal de parada recibida...")
-        loop.call_soon_threadsafe(stop_event.set)
+async def opcua_connection():
+    #  stop_event = asyncio.Event()
 
-    signal.signal(signal.SIGINT, manejar_parada)
-    signal.signal(signal.SIGTERM, manejar_parada)
+    async with Client(url=URL, timeout=22, watchdog_intervall=222.1,) as conn:
+        print(conn)
+
+        # Crear un objeto node para cada tag 
+        nodes_by_tag = {
+            tag: conn.get_node(f"{NODE_ID_PREFIX}{tag}")
+            for tag in ALL_TAGS
+        } 
+
+        # Relacion inversa -> NodeId completo -> nombre STAG
+        tag_by_node_id = {
+            node.nodeid.to_string(): tag
+            for tag, node in nodes_by_tag.items()
+        }
+
+
+        # Crear suscripcion OPC UA
+        handler      = SusctiptionHandler(tag_by_node_id=tag_by_node_id,)
+        subscription = await conn.create_subscription(READ_TAGS_TIME_MS, handler) 
+        handles      = await subscription.subscribe_data_change(list(nodes_by_tag.values()), queuesize=1000, sampling_interval=READ_TAGS_TIME_MS)
+
+        while True: 
+            print('Conectado')
+            await asyncio.sleep(22)
+            await conn.check_connection()
+
+
+
 
 
 async def main():
-    stop_event = asyncio.Event()
-    configurar_senales_de_parada(stop_event)
+    while True:
+        try:
+            await opcua_connection()
+        except Exception as e:
+            await asyncio.sleep(11)
 
-    await ejecutar(stop_event)
 
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     asyncio.run(main())
+
+

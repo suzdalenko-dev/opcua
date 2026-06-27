@@ -6,5 +6,4 @@ __pycache__/
 venv/
 
 # Datos generados por el servicio (no deben subirse al repositorio)
-/var/lib/froxa-opcua/
 *.log
