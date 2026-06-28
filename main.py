@@ -39,18 +39,18 @@ async def opcua_connection():
             
 
 async def main():
+    write_headbeat_log()                                # escritura de head bit 
+    writer_task = asyncio.create_task(jsonl_writer())   # consumidor de la cola todos los STAGS
     while True:
         try:
             CONNECTION_STATE.set_connected(False)
-            write_headbeat_log()
-            writer_task = asyncio.create_task(jsonl_writer())   # consumidor de la cola
             await opcua_connection()
         except Exception as e:
             print(f"ERROR MAIN {e}")
             await asyncio.sleep(11)
         finally:
             CONNECTION_STATE.set_connected(False)
-            writer_task.cancel()
+
 
 
 if __name__ == '__main__':
