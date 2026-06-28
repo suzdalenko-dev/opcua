@@ -6,11 +6,20 @@ from assets.event_queue_file import STATS_QUEUE
 from config import JSONL_BASE_DIRECTORY
 
 
+def _run_forever(fn, name):
+    while True:
+        try:
+            fn()
+        except Exception as e:
+            print(f"{e} run forever failed ")
+            time.sleep(3)
+
+
 def start_stats_writer():
     '''
     Solo arranca 1 vez
     '''
-    tread = threading.Thread(target=_stats_writer_loop, daemon=True)
+    tread = threading.Thread(target=_run_forever,args=(_stats_writer_loop, "_stats_writer_loop"), daemon=True)
     tread.start()
     return tread
 
