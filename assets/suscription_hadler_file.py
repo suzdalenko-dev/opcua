@@ -1,6 +1,6 @@
 import asyncio
 
-from assets.event_queue_file import EVENT_QUEUE
+from assets.event_queue_file import EVENT_QUEUE, STATS_QUEUE
 from assets.utils_file import current_date, format_datetime
 from config import TAGS
 
@@ -13,9 +13,7 @@ class SusctiptionHandler:
     def datachange_notification(self, node, value, data,):
         if not self.active:
             return
-        
-        print(data)
-        
+         
         # -------------------------------------------------
         # 1. Identificar el nodo y el tag
         # -------------------------------------------------
@@ -57,17 +55,8 @@ class SusctiptionHandler:
         source_timestamp = data_value.SourceTimestamp
         server_timestamp = data_value.ServerTimestamp
 
-
-        # 5. Escribir los TAGS de estadisticas
-
-        if tag in TAGS:
-            # con un Tread nuevo y con toda la seguridad/simplicidad/estabilidad 
-            print("aqui quiero guradar cada TAG que lleva en un archivo stats")
-
-
-
         # -------------------------------------------------
-        # 6. Construir el diccionario archivo all
+        # 5. Construir el diccionario archivo all
         # -------------------------------------------------
 
         event = {
@@ -81,7 +70,18 @@ class SusctiptionHandler:
             "server_t": format_datetime(server_timestamp),
         }
 
-        print(event)
+
+        # 6. Escribir los TAGS de estadisticas en el archivo stats.json
+
+        if tag in TAGS:
+            print(tag)
+
+            try:
+                STATS_QUEUE.put_nowait(event)
+            except Exception as e:
+                print(f"Error stats queue {e}")
+
+        
 
         # -------------------------------------------------
         # 7. Introducirlo en la cola global archivo all

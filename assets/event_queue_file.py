@@ -1,6 +1,7 @@
 import asyncio
 
 EVENT_QUEUE = asyncio.Queue(maxsize=50_000,)
+STATS_QUEUE = asyncio.Queue(maxsize=50_000,)
 
 '''
 A ver si entiendo el ciclo de vida de 
