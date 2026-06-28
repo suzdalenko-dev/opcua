@@ -28,7 +28,7 @@ def write_heartbeat_file():
             year_directory.mkdir(parents=True, exist_ok=True, )
             heartbeat_file_path = (year_directory / HEARTBEAT_FILE_NAME)
 
-            heartbeat = {"date": current_date(), "conn": ("yes" if CONNECTION_STATE.is_connected() else "no"),}
+            heartbeat = {"date": current_date()[:-4] , "conn": ("yes" if CONNECTION_STATE.is_connected() else "no"),}
 
             with open(heartbeat_file_path, "a", encoding="utf-8") as file:
                 json.dump(heartbeat, file, ensure_ascii=False,)

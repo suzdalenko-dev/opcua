@@ -7,6 +7,7 @@ from assets.suscription_hadler_file import SusctiptionHandler
 from config import ALL_TAGS, NODE_ID_PREFIX, READ_TAGS_TIME_MS, URL
 
 
+
 async def opcua_connection():
     #  stop_event = asyncio.Event()
 
@@ -32,11 +33,12 @@ async def opcua_connection():
         handles      = await subscription.subscribe_data_change(list(nodes_by_tag.values()), queuesize=1000, sampling_interval=READ_TAGS_TIME_MS)
 
         while True: 
-            print('Conectado')
-            await asyncio.sleep(22)
             await conn.check_connection()
             CONNECTION_STATE.set_connected(True)
-            
+            print('Conectado')
+            await asyncio.sleep(22)
+
+
 
 async def main():
     write_headbeat_log()                                # escritura de head bit 

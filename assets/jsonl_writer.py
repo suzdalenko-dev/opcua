@@ -13,7 +13,6 @@ WRITE_RETRY_SECONDS = 5
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
-
 def append_event_jsonl(event):
     year_directory = (BASE_DIRECTORY / f"{ datetime.now().year:04d}")
     year_directory.mkdir(parents=True, exist_ok=True,)
