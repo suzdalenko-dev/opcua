@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 BASE_DIRECTORY = Path(__file__).resolve().parent
-
 load_dotenv(dotenv_path=BASE_DIRECTORY / ".env",)
 
 def required_env(variable_name):
@@ -17,11 +16,11 @@ def required_env(variable_name):
     return value
 
 
+
 URL                        = required_env("OPCUA_URL")
 NODE_ID_PREFIX             = required_env("OPCUA_NODE_ID_PREFIX",)
-JSONL_BASE_DIRECTORY       = Path(os.getenv("JSONL_BASE_DIRECTORY",))
+JSONL_BASE_DIRECTORY       = Path(required_env("JSONL_BASE_DIRECTORY",))
 READ_TAGS_TIME_MS          = 222
-
 HEARTBEAT_FILE_NAME        = required_env("HEARTBEAT_FILE_NAME",)
 
 
