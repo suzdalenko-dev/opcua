@@ -1,5 +1,6 @@
 import asyncio
 from asyncua import Client
+from assets.hertbeat_writer_file import write_headbeat_log
 from assets.jsonl_writer import jsonl_writer
 from assets.suscription_hadler_file import SusctiptionHandler
 from config import ALL_TAGS, NODE_ID_PREFIX, READ_TAGS_TIME_MS, URL
@@ -35,6 +36,7 @@ async def opcua_connection():
             print('Conectado')
             await asyncio.sleep(22)
             await conn.check_connection()
+            OPCUA_CONNECTED = True
 
 
 
@@ -45,10 +47,12 @@ async def main():
         try:
             writer_task = asyncio.create_task(jsonl_writer())   # consumidor de la cola
             await opcua_connection()
+            write_headbeat_log()
         except Exception as e:
             print(f"ERROR MAIN {e}")
             await asyncio.sleep(11)
         finally:
+            OPCUA_CONNECTED = False
             writer_task.cancel()
 
 
