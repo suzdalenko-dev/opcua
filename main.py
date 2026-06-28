@@ -12,6 +12,7 @@ async def opcua_connection():
     #  stop_event = asyncio.Event()
 
     async with Client(url=URL, timeout=22, watchdog_intervall=222.1,) as conn:
+        global OPCUA_CONNECTED
         print(conn)
 
         # Crear un objeto node para cada tag 
@@ -43,6 +44,7 @@ async def opcua_connection():
 
 
 async def main():
+    global OPCUA_CONNECTED
     while True:
         try:
             writer_task = asyncio.create_task(jsonl_writer())   # consumidor de la cola

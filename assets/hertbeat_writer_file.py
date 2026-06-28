@@ -4,7 +4,7 @@ import os
 from datetime import datetime, time
 import threading
 from assets.utils_file import current_date
-from config import HEARTBEAT_FILE_NAME, JSONL_BASE_DIRECTORY, OPCUA_CONNECTED,
+from config import HEARTBEAT_FILE_NAME, JSONL_BASE_DIRECTORY, OPCUA_CONNECTED
 
 
 
