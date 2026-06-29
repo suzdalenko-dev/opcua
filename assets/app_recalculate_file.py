@@ -37,12 +37,15 @@ TAG_TO_KEY = {
 }
 
 # Escalar que SÍ reasignamos -> este sí necesita 'global' dentro de la función.
-old_peso_acumualado = None
+
+old_peso_acumualado = 0
+peso_medio          = 0
+num_bolsas_buenas       = 0
  
 def index_app(event):
     global TAG_TO_KEY
     global ESTADO
-    global old_peso_acumualado
+    global old_peso_acumualado, peso_medio, num_bolsas_buenas
 
     tag = event["tag"]
     key = TAG_TO_KEY.get(tag)
@@ -55,9 +58,23 @@ def index_app(event):
     else:
         ESTADO[key] = event["value"]
 
-    # 2. Detectar Cambio peso acumulado 
-    if tag in ("STAG21", "STAG22", "STAG23", "STAG24", "STAG25", "STAG26", "STAG38", "STAG39", "STAG53"):
-        peso_acumulado_actual = value_to_number(event["value"])
+    # 2. Detectar Cambio peso acumulado
+    # De esta forma tengo 3 posibilidades de escribir la line buena en db, pero solo escrbo con datos completos y correctos  
+    
+    if tag in ("STAG53", "STAG37", "STAG38", "STAG39"):
+        if tag == 'STAG37':
+            num_bolsas_buenas     = value_to_number(event["value"])
+        if tag == 'STAG38':
+            peso_acumulado_actual = value_to_number(event["value"])
+        if tag == 'STAG39':
+            peso_medio            = value_to_number(event["value"])
+
+        if num_bolsas_buenas == 0:
+            pass
+        else:
+            peso_medio_calcuculado = peso_acumulado_actual / num_bolsas_buenas
+            if abs(peso_medio - peso_medio_calcuculado) > 0.1:
+                return
 
         if old_peso_acumualado  != peso_acumulado_actual:
             # mi idea es si cambia el valor de peso acumulado guardo la linea en la base datos 
@@ -69,7 +86,7 @@ def index_app(event):
 
 
 def save_to_db(db_line):
-  # esta linea es la que guardare en la BD
-  # para calcular ritmo kg/hora linea produccion utilizare varias lineas y
-  # comprobando que las lineas buenas tienen valor de kg medio = kg acumulado total / numero bolsas buenas 
+   # esta linea es la que guardare en la BD
+   # para calcular ritmo kg/hora linea produccion utilizare varias lineas y
+   # comprobando que las lineas buenas tienen valor de kg medio = kg acumulado total / numero bolsas buenas 
    print(db_line)
