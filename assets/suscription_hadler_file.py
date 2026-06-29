@@ -71,8 +71,10 @@ class SusctiptionHandler:
             "server_t": format_datetime(server_timestamp),
         }
 
-        index_app(event)
-
+        try:
+            index_app(event)
+        except Exception as e:
+            print(f"Error index_app {e}")
 
         # 6. Escribir los TAGS de estadisticas en el archivo stats.json
 

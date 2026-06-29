@@ -26,3 +26,14 @@ def format_datetime(date_value):
         return ""
 
     return date_value.strftime(DATE_FORMAT_SECONDS,)[:-3] 
+
+
+
+def value_to_number(value):
+    """Convierte '  3479.454' o '3364' a float/int; si no, deja el texto."""
+    try:
+        texto = str(value).strip().rstrip("G").strip()
+        return float(texto)
+    except (ValueError, TypeError):
+        return value
+ 
