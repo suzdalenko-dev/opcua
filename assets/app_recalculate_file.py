@@ -38,15 +38,14 @@ TAG_TO_KEY = {
 
 # Escalar que SÍ reasignamos -> este sí necesita 'global' dentro de la función.
 
-peso_acumulado_actual = 0
+
 old_peso_acumualado   = 0
-peso_medio            = 0
-num_bolsas_buenas     = 0
+
  
 def index_app(event):
     global TAG_TO_KEY
     global ESTADO
-    global old_peso_acumualado, peso_medio, num_bolsas_buenas, peso_acumulado_actual
+    global old_peso_acumualado
 
     tag = event["tag"]
     key = TAG_TO_KEY.get(tag)
@@ -63,27 +62,21 @@ def index_app(event):
     # De esta forma tengo 3 posibilidades de escribir la line buena en db, pero solo escrbo con datos completos y correctos  
     
     if tag in ("STAG53", "STAG37", "STAG38", "STAG39"):
-        if tag == 'STAG37':
-            num_bolsas_buenas     = value_to_number(event["value"])
-        if tag == 'STAG38':
-            peso_acumulado_actual = value_to_number(event["value"])
-        if tag == 'STAG39':
-            peso_medio            = value_to_number(event["value"])
 
-        if num_bolsas_buenas == 0:
+        if ESTADO["bolsas_buenas"] == 0:
             pass
         else:
-            peso_medio_calcuculado = peso_acumulado_actual / num_bolsas_buenas
-            if abs(peso_medio - peso_medio_calcuculado) > 0.1:
+            peso_medio_calcuculado = ESTADO["kg"] / ESTADO["bolsas_buenas"]
+            if abs(ESTADO["peso_medio"] - peso_medio_calcuculado) > 0.1:
                 return
 
-        if old_peso_acumualado  != peso_acumulado_actual:
+        if old_peso_acumualado  != ESTADO["kg"] :
             # mi idea es si cambia el valor de peso acumulado guardo la linea en la base datos 
             db_line_unique         = dict(ESTADO)
             db_line_unique['date'] = current_date()
             save_to_db(db_line_unique)
 
-        old_peso_acumualado = peso_acumulado_actual
+        old_peso_acumualado = ESTADO["kg"]
 
 
 def save_to_db(db_line):
