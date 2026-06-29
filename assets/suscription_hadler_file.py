@@ -1,5 +1,6 @@
 import asyncio
 
+from assets.app_recalculate_file import index_app
 from assets.event_queue_file import EVENT_QUEUE, STATS_QUEUE
 from assets.utils_file import current_date, format_datetime
 from config import TAGS
@@ -69,6 +70,8 @@ class SusctiptionHandler:
             "source_t": format_datetime(source_timestamp),
             "server_t": format_datetime(server_timestamp),
         }
+
+        index_app(event)
 
 
         # 6. Escribir los TAGS de estadisticas en el archivo stats.json
