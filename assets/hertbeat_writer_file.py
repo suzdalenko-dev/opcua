@@ -20,18 +20,17 @@ def write_heartbeat_file():
         ...2026/head-bit.json
         """
         try:
-
             time.sleep(22)
 
             now = datetime.now()
             year_directory = JSONL_BASE_DIRECTORY / f"{now.year:04d}"
             year_directory.mkdir(parents=True, exist_ok=True, )
-            moth_directory = JSONL_BASE_DIRECTORY / f"{now.year:04d}" / f"{now.month:04d}"
+
+            moth_directory = year_directory / f"{now.month:02d}"
             moth_directory.mkdir(parents=True, exist_ok=True, )
 
-            heartbeat_file_path = (moth_directory / HEARTBEAT_FILE_NAME)
-
-            heartbeat = {"date": current_date()[:-4] , "conn": ("yes" if CONNECTION_STATE.is_connected() else "no"),}
+            heartbeat_file_path = moth_directory / HEARTBEAT_FILE_NAME
+            heartbeat = {"date": current_date(), "conn": ("yes" if CONNECTION_STATE.is_connected() else "no"),}
 
             with open(heartbeat_file_path, "a", encoding="utf-8") as file:
                 json.dump(heartbeat, file, ensure_ascii=False,)

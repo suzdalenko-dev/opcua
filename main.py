@@ -45,7 +45,7 @@ async def opcua_connection():
 
 
 async def main():
-    write_headbeat_log()                                # escritura de head bit 
+    write_headbeat_log()                                   # escritura de head bit 
     #  writer_task = asyncio.create_task(jsonl_writer())   # consumidor de la cola todos los STAGS
     writer_task = asyncio.create_task(supervised(jsonl_writer, "json_writer"))
     start_stats_writer()
